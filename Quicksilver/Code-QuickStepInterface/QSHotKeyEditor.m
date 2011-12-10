@@ -1,7 +1,7 @@
-NSString * stringForModifiers( unsigned int aModifierFlags );
+NSString * stringForModifiers( NSUInteger aModifierFlags );
 
 #import "QSHotKeyEditor.h"
-
+#import "QSApp.h"
 #import "QSHotKeyEvent.h"
 
 @implementation QSHotKeyCell
@@ -35,7 +35,7 @@ NSString * stringForModifiers( unsigned int aModifierFlags );
 	//if ([thisTrigger objectForKey:@"keyCode"] && [thisTrigger objectForKey:@"modifiers"]) {
 	//		QSHotKeyEvent *activationKey = (QSHotKeyEvent *)[QSHotKeyEvent getHotKeyForKeyCode:[[thisTrigger objectForKey:@"keyCode"] shortValue]
 	//																			  character:0
-	//																	  safeModifierFlags:[[thisTrigger objectForKey:@"modifiers"] intValue]];
+	//																	  safeModifierFlags:[[thisTrigger objectForKey:@"modifiers"] integerValue]];
 	//		return [activationKey stringValue];
 	//		return @"nil";
 	[super setStringValue:string];
@@ -110,7 +110,7 @@ NSString * stringForModifiers( unsigned int aModifierFlags );
 	defaultString = [[self string] copy];
 	BOOL status = [super becomeFirstResponder];
 	validCombo = NO;
-	[NSApp addEventDelegate:self];
+	[(QSApp *)[NSApplication sharedApplication] addEventDelegate:self];
 	[self _disableHotKeyOperationMode];
 	[self setSelectedRange:NSMakeRange(0, [[self string] length])];
 	return status;
@@ -123,7 +123,7 @@ NSString * stringForModifiers( unsigned int aModifierFlags );
 - (BOOL)resignFirstResponder {
 	[defaultString release];
 	defaultString = nil;
-	[NSApp removeEventDelegate:self];
+	[(QSApp *)[NSApplication sharedApplication] removeEventDelegate:self];
 	[self _restoreHotKeyOperationMode];
 	return [super resignFirstResponder];
 }
@@ -133,7 +133,7 @@ NSString * stringForModifiers( unsigned int aModifierFlags );
 		if (VERBOSE) NSLog(@"Cancel");
 #endif
         /* TODO: Check what is actually delegate */
-		[[self window] makeFirstResponder:[self delegate]];
+		[[self window] makeFirstResponder:(NSResponder *)[self delegate]];
 	}
 }
 - (void)flagsChanged:(NSEvent *)theEvent {
@@ -141,7 +141,7 @@ NSString * stringForModifiers( unsigned int aModifierFlags );
 	[self setString:[newString length] ? newString:defaultString];
 }
 - (void)setDictionaryStringWithEvent:(NSEvent *)theEvent {
-	unsigned int modifiers = [theEvent modifierFlags];
+	NSUInteger modifiers = [theEvent modifierFlags];
 	unsigned short keyCode = [theEvent keyCode];
 	NSString *characters = (keyCode == 48) ? @"\t" : [theEvent charactersIgnoringModifiers];
 	//	NSLog(@"event %@", theEvent);
@@ -204,7 +204,7 @@ NSString * stringForModifiers( unsigned int aModifierFlags );
 }
 
 - (NSDictionary *)hotKeyDictForEvent:(NSEvent *)event {
-	unsigned int modifiers = [event modifierFlags];
+	NSUInteger modifiers = [event modifierFlags];
 	unsigned short keyCode = [event keyCode];
 //	NSString *character = (keyCode == 48) ? @"\t" : [event charactersIgnoringModifiers];
 	return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:modifiers] , @"modifiers", [NSNumber numberWithUnsignedShort:keyCode] , @"keyCode", nil];

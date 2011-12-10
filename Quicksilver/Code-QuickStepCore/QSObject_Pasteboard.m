@@ -48,8 +48,8 @@ bool writeObjectToPasteboard(NSPasteboard *pasteboard, NSString *type, id data) 
 
 	if (!theObject && [[pasteboard types] containsObject:@"QSObjectAddress"]) {
 		NSArray *objectIdentifier = [[pasteboard stringForType:@"QSObjectAddress"] componentsSeparatedByString:@":"];
-		if ([[objectIdentifier objectAtIndex:0] intValue] == [[NSProcessInfo processInfo] processIdentifier])
-			return (QSObject *)[[objectIdentifier lastObject] intValue];
+		if ([[objectIdentifier objectAtIndex:0] integerValue] == [[NSProcessInfo processInfo] processIdentifier])
+			return (QSObject *)[[objectIdentifier lastObject] integerValue];
 #ifdef DEBUG
 		else if (VERBOSE)
 			NSLog(@"Ignored old object: %@", objectIdentifier);
@@ -209,7 +209,7 @@ bool writeObjectToPasteboard(NSPasteboard *pasteboard, NSString *type, id data) 
 	} else {
 		NSString *names[] = {[itemForKey(NSStringPboardType) stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]], @"PDF Image", @"Finder Icon", @"PICT Image", @"PostScript Image", @"TIFF Image", @"Color Data", @"File Contents", @"Font Information", @"HTML Data", @"Paragraph Formatting", @"Tabular Text", @"VCard Data", @"Promised Files"} ;
 		NSString *keys[] = {NSStringPboardType, NSPDFPboardType, [@"'icns'" encodedPasteboardType] , NSPICTPboardType, NSPostScriptPboardType, NSTIFFPboardType, NSColorPboardType, NSFileContentsPboardType, NSFontPboardType, NSHTMLPboardType, NSRulerPboardType, NSTabularTextPboardType, NSVCardPboardType, NSFilesPromisePboardType} ;
-		int i;
+		NSInteger i;
 		for (i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
 			if (itemForKey(keys[i]) )
 				[self setName:names[i]];
@@ -231,7 +231,7 @@ bool writeObjectToPasteboard(NSPasteboard *pasteboard, NSString *type, id data) 
 		// get the different pboard types from the object's data dictionary -- they're all stored here
 		types = [[[[self dataDictionary] allKeys] mutableCopy] autorelease];
 		if ([types containsObject:QSProxyType])
-			[(NSMutableArray *)types addObjectsFromArray:[[[self resolvedObject] dataDictionary] allKeys]];
+			[(NSMutableArray *)types addObjectsFromArray:[[(QSObject *)[self resolvedObject] dataDictionary] allKeys]];
 	}
 	else {
 		NSMutableSet *typeSet = [NSMutableSet setWithArray:types];

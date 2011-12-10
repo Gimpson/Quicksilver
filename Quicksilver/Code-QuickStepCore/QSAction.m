@@ -4,7 +4,6 @@
 #import "QSTypes.h"
 #import "QSRegistry.h"
 #import "QSResourceManager.h"
-#import "NDAppleScriptObject.h"
 #import "NSBundle_BLTRExtensions.h"
 #import "QSExecutor.h"
 
@@ -116,13 +115,13 @@ static BOOL gModifiersAreIgnored;
 	return num ? [num floatValue] : 0.0;
 }
 
-- (int)rank { return rank;  }
-- (void)_setRank:(int)newRank {
+- (NSInteger)rank { return rank;  }
+- (void)_setRank:(NSInteger)newRank {
 	[self willChangeValueForKey:@"rank"];
 	rank = newRank;
 	[self didChangeValueForKey:@"rank"];
 }
-- (void)setRank:(int)newRank {
+- (void)setRank:(NSInteger)newRank {
 	rank = newRank;
 	[QSExec updateRanks];
 }
@@ -159,8 +158,8 @@ static BOOL gModifiersAreIgnored;
 	[QSExec noteNewName:dname forAction:self];
 }
 
-- (int)userRank { return rank+1;  }
-- (void)setUserRank:(int)newRank {
+- (NSInteger)userRank { return rank+1;  }
+- (void)setUserRank:(NSInteger)newRank {
 	rank = newRank-1;
 	[QSExec updateRanks];
 }
@@ -189,10 +188,10 @@ static BOOL gModifiersAreIgnored;
 		[[self actionDict] removeObjectForKey:kActionSelector];
 }
 
-- (int)argumentCount {
+- (NSInteger)argumentCount {
     id obj = [[self actionDict] objectForKey:kActionArgumentCount];
     if (obj)
-        return [obj intValue];
+        return [obj integerValue];
     
     id provider = [self provider];
     if ([provider respondsToSelector:@selector(argumentCountForAction:)])
@@ -201,7 +200,7 @@ static BOOL gModifiersAreIgnored;
     return [[QSActionProvider provider] argumentCountForAction:[self identifier]];
 }
 
-- (void)setArgumentCount:(int)newArgumentCount {
+- (void)setArgumentCount:(NSInteger)newArgumentCount {
     [[self actionDict] setObject:[NSNumber numberWithInt:newArgumentCount]
                           forKey:kActionArgumentCount];
 }
@@ -346,7 +345,7 @@ static BOOL gModifiersAreIgnored;
     return 0.0;
 }
 
-- (int)order {
+- (NSInteger)order {
     return [self rank];
 }
 

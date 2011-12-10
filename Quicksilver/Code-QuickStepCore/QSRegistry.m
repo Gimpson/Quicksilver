@@ -144,9 +144,14 @@ QSRegistry* QSReg = nil;
 	Class providerClass = NSClassFromString(className);
 	//NSLog(@"Class <%@>", NSStringFromClass(providerClass) );
 	if (!providerClass) {
+    NSError *error = nil;
         NSBundle * bundle = [classBundles objectForKey:className];
-		if([bundle load] == NO)
-            NSLog(@"Failed loading bundle %@", bundle);
+		if([bundle loadAndReturnError:&error] == NO)
+		{
+		  NSLog(@"Failed loading bundle %@", bundle);
+      NSLog(@"Error: %@", error);
+		}
+            
 		providerClass = NSClassFromString(className);
 	}
 	if (providerClass) {
@@ -345,7 +350,7 @@ QSRegistry* QSReg = nil;
 //
 //	//	NSLog(@"errors %@", loadErrors);
 //	[self suggestOldPlugInRemoval];
-//	if (DEBUG_STARTUP) NSLog(@"PlugIn Load Complete (%dms) ", (int)(-[date timeIntervalSinceNow] *1000));
+//	if (DEBUG_STARTUP) NSLog(@"PlugIn Load Complete (%dms) ", (NSInteger)(-[date timeIntervalSinceNow] *1000));
 //	initialLoadComplete = YES;
 //}
 #if 0
@@ -370,7 +375,7 @@ QSRegistry* QSReg = nil;
 	[allBundles addObject:[appBundle bundlePath]];
 	[bundleSearchPaths addObject:[appBundle builtInPlugInsPath]];
 
-	if ((int) getenv("QSDisableExternalPlugIns")) {
+	if ((NSInteger) getenv("QSDisableExternalPlugIns")) {
 		NSLog(@"External PlugIns Disabled");
 	} else {
 		NSArray *librarySearchPaths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSAllDomainsMask - NSSystemDomainMask, YES);

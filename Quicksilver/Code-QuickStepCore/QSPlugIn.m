@@ -43,7 +43,7 @@ NSMutableDictionary *plugInBundlePaths = nil;
 
 - (id)initWithWebInfo:(NSDictionary *)webInfo {
 	if (self = [super init]) {
-		data = [webInfo retain];
+		data = [webInfo mutableCopy];
 		bundle = nil;
 	}
 	return self;
@@ -142,7 +142,7 @@ NSMutableDictionary *plugInBundlePaths = nil;
 	}
 	if ([self isLoaded]) {
 		if ( [bundle isLoaded]) {
-			int fileSize = [[[[NSFileManager defaultManager] attributesOfItemAtPath:[bundle executablePath] error:nil] objectForKey:NSFileSize] intValue];
+			NSInteger fileSize = [[[[NSFileManager defaultManager] attributesOfItemAtPath:[bundle executablePath] error:nil] objectForKey:NSFileSize] integerValue];
 
 			status = [NSString stringWithFormat:@"Loaded (%dk) ", fileSize/1024];
 		} else {
@@ -367,7 +367,7 @@ NSMutableDictionary *plugInBundlePaths = nil;
 	return smallIcon;
 }
 
-- (int) isInstalled {
+- (NSInteger) isInstalled {
 	if (bundle) return 1;
 	else if (installing) return -1;
 	else return 0;
@@ -385,7 +385,7 @@ NSMutableDictionary *plugInBundlePaths = nil;
 	return [[[self info] valueForKeyPath:@"QSPlugIn.hidden"] boolValue];
 }
 
-- (int) isLoaded {return loaded;}
+- (NSInteger) isLoaded {return loaded;}
 #define disabledPlugIns [[NSUserDefaults standardUserDefaults] arrayForKey:@"QSDisabledPlugIns"]
 - (NSColor *)enabledColor {
 	return [self isInstalled] ?[NSColor blackColor] :[NSColor grayColor];
@@ -395,7 +395,7 @@ NSMutableDictionary *plugInBundlePaths = nil;
 - (NSString *)path {return [bundle bundlePath];}
 - (NSString *)bundlePath {return [bundle bundlePath];}
 
-- (int) enabled {
+- (NSInteger) enabled {
 	if (!bundle)
 		return installing?-1:0;
 	return ![disabledPlugIns containsObject:[bundle bundleIdentifier]];
@@ -550,7 +550,7 @@ NSMutableDictionary *plugInBundlePaths = nil;
 				NSBundle *pathBundle = [NSBundle bundleWithPath:path];
 				[pathBundle load];
 				//CFBundleRef b = CFBundleCreate(NULL, [NSURL fileURLWithPath:path]);
-				//int err = CFBundleLoadExecutable(b);
+				//NSInteger err = CFBundleLoadExecutable(b);
 				NSLog(@"path %@ %@ %@", path, resource, pathBundle);
 
 				if (!path) {
@@ -692,24 +692,26 @@ NSMutableDictionary *plugInBundlePaths = nil;
 	[state writeToFile:pStateLocation atomically:NO];
 	
 	//NSLog(@"%s", __PRETTY_FUNCTION__) ;
-	NS_DURING
+	@try {
 		[self _registerPlugIn];
-	NS_HANDLER
-		NSString *errorMessage = [NSString stringWithFormat:@"An error ocurred while loading plug-in \"%@\": %@", self, localException];
+	}
+	@catch (NSException *e) {
 #ifdef DEBUG
 		if (VERBOSE) {
+		  NSString *errorMessage = [NSString stringWithFormat:@"An error ocurred while loading plug-in \"%@\": %@", self, e];
 			NSLog(@"%@", errorMessage);
-			[localException printStackTrace];
+			[e printStackTrace];
 		}
 #endif
-		[self setLoadError:[localException reason]];
-	NS_ENDHANDLER
-	
-	[state removeObjectForKey:kQSPluginCausedCrashAtLaunch];
-	[state removeObjectForKey:kQSFaultyPluginPath];
-	[state writeToFile:pStateLocation atomically:NO];
-	[state release];
-	
+		[self setLoadError:[e reason]];
+	}
+	@finally {
+		[state removeObjectForKey:kQSPluginCausedCrashAtLaunch];
+		[state removeObjectForKey:kQSFaultyPluginPath];
+		[state writeToFile:pStateLocation atomically:NO];
+		[state release];
+	}
+
 	return YES;
 }
 

@@ -87,16 +87,17 @@ IMPORTANT: This Apple software is supplied to you by Apple Computer, Inc. ("Appl
 	if ([object isKindOfClass:[NSString class]]) {
 		[super setObjectValue:object];
 	} else {
-		NS_DURING
+		@try {
 			id value;
 			value = [object valueForKey:@"text"];
 			[super setObjectValue:value?value:@""];
 			value = [object valueForKey:@"image"];
 			[self setImage:value];
-		NS_HANDLER
-			[super setObjectValue:@""];
-			NSLog(@"Error %@", localException);
-		NS_ENDHANDLER
+		}
+		@catch (NSException *e) {
+		  [super setObjectValue:@""];
+			NSLog(@"Error %@", e);
+		}
 	}
 }
 
@@ -129,7 +130,7 @@ IMPORTANT: This Apple software is supplied to you by Apple Computer, Inc. ("Appl
 //	return textObj;
 //
 //}
-- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength {
+- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(NSInteger)selStart length:(NSInteger)selLength {
 	NSRect textFrame = [self textRectForFrame:aRect];
 	[super selectWithFrame: textFrame inView: controlView editor:textObj delegate:anObject start:selStart length:selLength];
 }

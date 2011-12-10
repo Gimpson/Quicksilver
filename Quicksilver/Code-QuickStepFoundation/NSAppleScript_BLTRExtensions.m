@@ -8,12 +8,10 @@
 
 #import "NSAppleScript_BLTRExtensions.h"
 #import "NSData_RangeExtensions.h"
-#import "NDAppleScriptObject.h"
 #import "NDResourceFork.h"
 
 #import <Carbon/Carbon.h>
 
-#import "NSAppleEventDescriptor+NDAppleScriptObject.h"
 
 @interface NSAppleScript (NSPrivate)
 + (struct ComponentInstanceRecord *)_defaultScriptingComponent;
@@ -30,7 +28,7 @@
 - (NSAppleEventDescriptor *)descriptorByTranslatingObject:(id)object ofType:(id)type inSuite:(id)suite;
 - (id)objectByTranslatingDescriptor:(NSAppleEventDescriptor *)descriptor toType:(id)type inSuite:(id)suite;
 - (void)registerTranslator:(id)translator selector:(SEL) selector toTranslateFromClass:(Class) class;
-- (void)registerTranslator:(id)translator selector:(SEL) selector toTranslateFromDescriptorType:(unsigned int) type;
+- (void)registerTranslator:(id)translator selector:(SEL) selector toTranslateFromDescriptorType:(NSUInteger) type;
 @end
 
 @implementation NSAppleScript (Constructors)
@@ -57,7 +55,7 @@
 		[argumentList insertDescriptor:arguments atIndex:[arguments numberOfItems] +1];
 		arguments = argumentList;
 	}
-	int pid = [[NSProcessInfo processInfo] processIdentifier];
+	NSInteger pid = [[NSProcessInfo processInfo] processIdentifier];
 	targetAddress = [[NSAppleEventDescriptor alloc] initWithDescriptorType:typeKernelProcessID bytes:&pid length:sizeof(pid)];
 	event = [[NSAppleEventDescriptor alloc] initWithEventClass:kASAppleScriptSuite eventID:kASSubroutineEvent targetDescriptor:targetAddress returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
 	subroutineDescriptor = [NSAppleEventDescriptor descriptorWithString:name];
@@ -102,22 +100,6 @@
 	return YES;
 }
 
-/*
- -(NSArray *)handlers {
-	 NSLog(@"id %d", _compiledScriptID);
-
-	 NSArray			* theNamesArray = nil;
-	 AEDescList		theNamesDescList;
-	 if ( OSAGetHandlerNames (OpenDefaultComponent( kOSAComponentType, kAppleScriptSubtype ), kOSAModeNull, _compiledScriptID, &theNamesDescList ) == noErr ) {
-
-
-		 theNamesArray = [NDAppleScriptObject objectForAEDesc: &theNamesDescList];
-		 AEDisposeDesc( &theNamesDescList );
-	 }
-
-	 return theNamesArray;
- }
- */
 @end
 
 @implementation NSAppleEventDescriptor (CocoaConversion)
@@ -128,55 +110,6 @@
 
 - (id)objectValueAPPLE {
 	return [[NSAEDescriptorTranslator sharedAEDescriptorTranslator] objectByTranslatingDescriptor:self toType:nil inSuite:nil];
-}
-
-+ (NSAppleEventDescriptor *)XdescriptorWithObject:(id)object {
-	NSAppleEventDescriptor *descriptorObject = nil;
-	if ([object isKindOfClass:[NSArray class]]) {
-		descriptorObject = [NSAppleEventDescriptor listDescriptor];
-		int i;
-		for (i = 0; i<[object count]; i++) {
-			[descriptorObject insertDescriptor:[NSAppleEventDescriptor descriptorWithObject:[object objectAtIndex:i]] atIndex:i+1];
-		}
-		return descriptorObject;
-	} else if ([object isKindOfClass:[NSString class]]) {
-		return [NSAppleEventDescriptor descriptorWithString:object];
-	} else if ([object isKindOfClass:[NSNumber class]]) {
-		return [NSAppleEventDescriptor descriptorWithInt32:[object intValue]];
-	} else if ([object isKindOfClass:[NSAppleEventDescriptor class]]) {
-		return object;
-	} else if ([object isKindOfClass:[NSNull class]]) {
-		return [NSAppleEventDescriptor nullDescriptor];
-	} else {
-		return nil;
-	}
-}
-
-- (id)xobjectValue {
-	// NSLog(@"Convert type: %@", NSFileTypeForHFSTypeCode([self descriptorType]) );
-	switch ([self descriptorType]) {
-		case kAENullEvent:
-			return nil;
-		case cAEList: {
-			NSMutableArray *array = [NSMutableArray arrayWithCapacity:[self numberOfItems]];
-			int i;
-			id theItem;
-			for (i = 0; i<[self numberOfItems]; i++) {
-				theItem = [[self descriptorAtIndex:i+1] objectValue];
-				if (theItem) [array addObject:theItem];
-			}
-			return array;
-		}
-		case cBoolean:
-			return [NSNumber numberWithBool:[self booleanValue]];
-
-			// if (typeAERecord == [self descriptorType]) {
-			//	 return [NSNumber numberWithBool:[self booleanValue]];
-			//	}
-		default:
-			return [self stringValue];
-	}
-	return nil;
 }
 
 + (NSAppleEventDescriptor *)descriptorWithPath:(NSString *)path {

@@ -13,9 +13,9 @@
 @end
 
 @interface NSObject (BLTRArrayPerform)
-+ (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(id)array returnValues:(BOOL)flag;
-- (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(id)array returnValues:(BOOL)flag;
-- (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(id)array;
++ (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(NSArray *)array returnValues:(BOOL)flag;
+- (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(NSArray *)array returnValues:(BOOL)flag;
+- (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(NSArray *)array;
 
 @end
 
@@ -32,8 +32,8 @@
 
 
 @interface NSMutableArray (Moving)
-- (void)moveIndex:(int)fromIndex toIndex:(int)toIndex;
-- (void)insertObjectsFromArray:(NSArray *)array atIndex:(unsigned)index;
+- (void)moveIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
+- (void)insertObjectsFromArray:(NSArray *)array atIndex:(NSUInteger)index;
 @end
 
 

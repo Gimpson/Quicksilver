@@ -129,7 +129,7 @@
 		NSArray *selection = [setsArrayController performSelector:@selector(selectedObjects)];
 		NSDictionary *dict = [selection lastObject];
 		if ([dict objectForKey:@"viewMode"]) {
-			[self setViewMode:[[dict objectForKey:@"viewMode"] intValue]];
+			[self setViewMode:[[dict objectForKey:@"viewMode"] integerValue]];
 		}
 		//if ([dict objectForKey:@"category"]) {
 			[self setCategory:[dict objectForKey:@"category"]];
@@ -176,8 +176,8 @@
 
 - (NSString *)helpPage {return @"PlugIns Preferences";}
 
-- (int) viewMode { return viewMode;  }
-- (void)setViewMode:(int)newViewMode {
+- (NSInteger) viewMode { return viewMode;  }
+- (void)setViewMode:(NSInteger)newViewMode {
 	viewMode = newViewMode;
 	[self reloadFilters];
 	[plugInTable scrollRowToVisible:0];
@@ -206,7 +206,7 @@
 	NSIndexSet *indexes = [plugInTable selectedRowIndexes];
 	if (!indexes) return nil;
 	NSMutableArray *bundles = [NSMutableArray array];
-	int index;
+	NSInteger index;
 	for (index = [indexes firstIndex]; index != NSNotFound; index = [indexes indexGreaterThanIndex:index]) {
 		[bundles addObject:[[arrayController arrangedObjects] objectAtIndex:index]];
 		if (index == [indexes lastIndex]) break;
@@ -275,7 +275,7 @@
 
 - (IBAction)reloadPlugIns:(id)sender { [[QSPlugInManager sharedInstance] downloadWebPlugInInfoIgnoringDate];  }
 
-- (void)tableView:(NSTableView *)aTableView willDisplayCell:(NSTextFieldCell*)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex {
+- (void)tableView:(NSTableView *)aTableView willDisplayCell:(NSTextFieldCell*)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex {
 	if ([[aTableColumn identifier] isEqualToString:@"enabled"]) {
 		NSArray *array = [arrayController arrangedObjects];
 		QSPlugIn *object = [array objectAtIndex:rowIndex];
@@ -345,7 +345,7 @@
 
 - (BOOL)isItemExpanded:(id)item {return YES;}
 
-- (float)outlineView:(NSOutlineView *)outlineView heightOfRowByItem:(id)item {
+- (CGFloat)outlineView:(NSOutlineView *)outlineView heightOfRowByItem:(id)item {
 	if ([[[item respondsToSelector:@selector(representedObject)] ? [item representedObject] : [(QSObject *)item observedObject] objectForKey:@"type"] isEqualToString:@"category"])
 		return 16;
 	return 32;
@@ -383,7 +383,7 @@
 	if ([predicates count])
 		filterPredicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
 	[arrayController setFilterPredicate:filterPredicate];
-	if (!ignoreView && ![[arrayController arrangedObjects] count]) {
+	if (!ignoreView && ![(NSArray *)[arrayController arrangedObjects] count]) {
 		[self reloadFiltersIgnoringViewMode:YES];
 	}
 }

@@ -19,7 +19,7 @@
 #define countBadgeTextAttributes [NSDictionary dictionaryWithObjectsAndKeys:[NSFont boldSystemFontOfSize:24] , NSFontAttributeName, [NSColor whiteColor] , NSForegroundColorAttributeName, nil]
 
 
-NSImage *QSBadgeImageForCount(int count) {
+NSImage *QSBadgeImageForCount(NSInteger count) {
 	if (count <= 1) return nil;
 	NSImage *badgeImage = nil;
 	NSString *numString = [NSString stringWithFormat:@"%d", count];
@@ -36,7 +36,7 @@ NSImage *QSBadgeImageForCount(int count) {
 	return badgeImage;
 }
 
-void QSDrawCountBadgeInRect(NSImage *countImage, NSRect badgeRect, int count) {
+void QSDrawCountBadgeInRect(NSImage *countImage, NSRect badgeRect, NSInteger count) {
 	[countImage drawInRect:badgeRect fromRect:rectFromSize([countImage size]) operation:NSCompositeSourceOver fraction:1.0];
 	NSString *numString = [NSString stringWithFormat:@"%d", count];
 	NSRect textRect = NSInsetRect(badgeRect, NSHeight(badgeRect) /4, NSHeight(badgeRect)/4);
@@ -53,7 +53,7 @@ void QSDrawCountBadgeInRect(NSImage *countImage, NSRect badgeRect, int count) {
 
 
 
-NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, int quadrant);
+NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, NSInteger quadrant);
 
 @implementation QSObjectCell
 
@@ -211,7 +211,7 @@ NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, int quadrant);
 			break;
 	}
 	if ([self isBezeled] && NSHeight(theRect) <= 20) {
-		theRect.origin.y += 1+(int) ((NSHeight(theRect)-16)/2);
+		theRect.origin.y += 1+(NSInteger) ((NSHeight(theRect)-16)/2);
 		theRect.size.height = 15;
 
 	}
@@ -307,7 +307,7 @@ NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, int quadrant);
 		if ([self highlightsBy] || isFirstResponder) {
 			QSObject *drawObject = [self representedObject];
 			BOOL action = [drawObject respondsToSelector:@selector(argumentCount)];
-			int argCount = (action ? [(QSAction *)drawObject argumentCount] : 0);
+			NSInteger argCount = (action ? [(QSAction *)drawObject argumentCount] : 0);
 			//BOOL indentRight = (indentLeft && [drawObject argumentCount] >1);
 			NSRect borderRect = NSInsetRect(cellFrame, 2.25, 2.25);
 			[roundRect setLineWidth:1.5];
@@ -452,14 +452,14 @@ NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, int quadrant);
 		[self setDetailsFont:[NSFont fontWithName:[[self font] fontName] size:[[self font] pointSize] *5/6]];
 	}
 	
-	[nameAttributes release];
+  [nameAttributes autorelease];
 	nameAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:
 		nameFont, NSFontAttributeName,
 		mainColor, NSForegroundColorAttributeName,
 		style, NSParagraphStyleAttributeName,
 		nil];
 
-	[detailsAttributes release];
+  [detailsAttributes autorelease];
 	detailsAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:
 		detailsFont, NSFontAttributeName,
 		fadedColor, NSForegroundColorAttributeName,
@@ -484,9 +484,10 @@ NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, int quadrant);
 
 		//NSLog(@"usingname: %@", nameString);
 		NSString *detailsString = [drawObject details];
-		NSSize nameSize = [nameString sizeWithAttributes:nameAttributes];
+    NSSize nameSize = NSZeroSize;
+    if (nameString && nameAttributes) nameSize = [nameString sizeWithAttributes:nameAttributes];
 		NSSize detailsSize = NSZeroSize;
-		if (detailsString) detailsSize = [detailsString sizeWithAttributes:detailsAttributes];
+		if (detailsString && detailsAttributes) detailsSize = [detailsString sizeWithAttributes:detailsAttributes];
         
 		BOOL useAlternateColor = [controlView isKindOfClass:[NSTableView class]] && [(NSTableView *)controlView isRowSelected:[(NSTableView *)controlView rowAtPoint:cellFrame.origin]];
 		NSColor *mainColor = (textColor?textColor:(useAlternateColor?[NSColor alternateSelectedControlTextColor] :[NSColor controlTextColor]) );
@@ -501,10 +502,10 @@ NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, int quadrant);
 			[titleString addAttribute:NSForegroundColorAttributeName value:fadedColor range:NSMakeRange(0, [titleString length])];
 
 			// Organise displaying the text, underlining the letters typed (in the name)
-			int i = 0;
-			int j = 0;
-			unsigned int hits[[titleString length]];
-			int count = [hitMask getIndexes:(unsigned int *)&hits maxCount:[titleString length] inIndexRange:nil];
+			NSInteger i = 0;
+			NSInteger j = 0;
+			NSUInteger hits[[titleString length]];
+			NSInteger count = [hitMask getIndexes:(NSUInteger *)&hits maxCount:[titleString length] inIndexRange:nil];
 			NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
 				mainColor, NSForegroundColorAttributeName,
 				mainColor, NSUnderlineColorAttributeName,
@@ -563,7 +564,6 @@ NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, int quadrant);
 	BOOL handlerDraw = NO;
 	if (NSWidth(drawingRect) >64)
 		handlerDraw = [drawObject drawIconInRect:(NSRect) drawingRect flipped:flipped];
-#warning - gave me a random exception (Patrick Robertson 07/05/11)
 	if (!handlerDraw) {
 		[icon setFlipped:flipped];
 
@@ -675,7 +675,7 @@ NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, int quadrant);
 	QSCommand* command = [item representedObject];
 
 	[command execute];
-	//int argumentCount = [(QSAction *)action argumentCount];
+	//NSInteger argumentCount = [(QSAction *)action argumentCount];
 
 	/*
 	 if (argumentCount == 2)
@@ -705,9 +705,10 @@ NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, int quadrant);
 }
 
 - (void)setNameFont:(NSFont *)newNameFont {
-    [nameFont autorelease];
-    nameFont = [newNameFont retain];
-    [[self controlView] setNeedsDisplay:YES];
+  [nameFont autorelease];
+  nameFont = [newNameFont retain];
+  
+  [[self controlView] setNeedsDisplay:YES];
 }
 
 - (NSFont *)detailsFont {
@@ -715,9 +716,10 @@ NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, int quadrant);
 }
 
 - (void)setDetailsFont:(NSFont *)newDetailsFont {
-    [detailsFont autorelease];
-    detailsFont = [newDetailsFont retain];
-    [[self controlView] setNeedsDisplay:YES];
+  [detailsFont autorelease];
+  detailsFont = [newDetailsFont retain];
+  
+  [[self controlView] setNeedsDisplay:YES];
 }
 
 - (float)cellRadiusFactor {
@@ -751,17 +753,17 @@ NSRect alignRectInRect(NSRect innerRect, NSRect outerRect, int quadrant);
 }
 //text attachment cell
 
-- (NSRect) cellFrameForTextContainer:(NSTextContainer *)textContainer proposedLineFragment:(NSRect)lineFrag glyphPosition:(NSPoint)position characterIndex:(unsigned)charIndex {
+- (NSRect) cellFrameForTextContainer:(NSTextContainer *)textContainer proposedLineFragment:(NSRect)lineFrag glyphPosition:(NSPoint)position characterIndex:(NSUInteger)charIndex {
 	return lineFrag;
 }
 - (BOOL)wantsToTrackMouse {return NO;} ;
-- (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)aTextView atCharacterIndex:(unsigned)charIndex untilMouseUp:(BOOL)flag {return NO;} ;
+- (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)aTextView atCharacterIndex:(NSUInteger)charIndex untilMouseUp:(BOOL)flag {return NO;} ;
 - (NSPoint) cellBaselineOffset {return NSZeroPoint;}
 - (NSTextAttachment *)attachment { return attachment;  }
 - (void)setAttachment:(NSTextAttachment *)newAttachment {attachment = newAttachment;}
 - (void)highlight:(BOOL)flag withFrame:(NSRect)cellFrame inView:(NSView *)aView {return;}
-- (BOOL)wantsToTrackMouseForEvent:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView atCharacterIndex:(unsigned)charIndex {return NO;}
-- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)aView characterIndex:(unsigned)charIndex {return;}
-- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView characterIndex:(unsigned)charIndex layoutManager:(NSLayoutManager *)layoutManager {return;}
+- (BOOL)wantsToTrackMouseForEvent:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView atCharacterIndex:(NSUInteger)charIndex {return NO;}
+- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)aView characterIndex:(NSUInteger)charIndex {return;}
+- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView characterIndex:(NSUInteger)charIndex layoutManager:(NSLayoutManager *)layoutManager {return;}
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)aTextView untilMouseUp:(BOOL)flag {return NO;}
 @end

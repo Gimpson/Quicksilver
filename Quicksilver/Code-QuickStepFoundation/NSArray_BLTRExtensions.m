@@ -9,7 +9,7 @@
 #import "NSArray_BLTRExtensions.h"
 
 @implementation NSMutableArray (Moving)
-- (void)moveIndex:(int)fromIndex toIndex:(int)toIndex {
+- (void)moveIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex {
 	if (fromIndex != toIndex){
 		[self insertObject:[self objectAtIndex:fromIndex] atIndex:toIndex];
 		if (toIndex<fromIndex)
@@ -17,7 +17,7 @@
 		[self removeObjectAtIndex:fromIndex];
 	}
 }
-- (void)insertObjectsFromArray:(NSArray *)array atIndex:(unsigned)index {
+- (void)insertObjectsFromArray:(NSArray *)array atIndex:(NSUInteger)index {
 	id object;
 	for(object in array)
 		[self insertObject:object atIndex:index];
@@ -28,7 +28,7 @@
 @implementation NSArray (IndexSet)
 - (NSArray *)objectsAtIndexes:(NSIndexSet *)indexes {
 	NSMutableArray *array = [NSMutableArray array];
-	unsigned int index;
+	NSUInteger index;
 	for (index = [indexes firstIndex]; index != NSNotFound; index = [indexes indexGreaterThanIndex:index])
 		[array addObject:[self objectAtIndex:index]];
 	return array;
@@ -58,9 +58,9 @@
 
 - (NSMutableArray *)arrayByPerformingSelector:(SEL)aSelector withObject:(id)object {
 	NSMutableArray *resultArray = [NSMutableArray arrayWithCapacity:[self count]];
-	int i;
+	NSInteger i;
 	id result = nil;
-	for (i = 0; i<(int) [self count]; i++) {
+	for (i = 0; i<(NSInteger) [self count]; i++) {
 		result = [[self objectAtIndex:i] performSelector:aSelector withObject:object];
 		[resultArray addObject:(result?result:[NSNull null])];
 	}
@@ -79,13 +79,13 @@
 
 @implementation NSObject (BLTRArrayPerform)
 
-+ (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(id)array returnValues:(BOOL)flag {
++ (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(NSArray *)array returnValues:(BOOL)flag {
 	NSMutableArray *resultArray = nil;
 	if (flag)
 		resultArray = [NSMutableArray arrayWithCapacity:[array count]];
-	int i;
+	NSInteger i;
 	id result;
-	for (i = 0; i<(int) [array count]; i++) {
+	for (i = 0; i<(NSInteger) [array count]; i++) {
 		result = [self performSelector:aSelector withObject:[array objectAtIndex:i]];
 		if (flag)
 			[resultArray addObject:(result?result:[NSNull null])];
@@ -93,21 +93,21 @@
 	return resultArray;
 }
 
-- (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(id)array returnValues:(BOOL)flag {
+- (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(NSArray *)array returnValues:(BOOL)flag {
 	NSMutableArray *resultArray = nil;
 	if (flag)
 		resultArray = [NSMutableArray arrayWithCapacity:[array count]];
-	int i;
+	NSInteger i;
 	id result;
-	for (i = 0; i<(int) [array count]; i++) {
+	for (i = 0; i<(NSInteger) [array count]; i++) {
 		result = [self performSelector:aSelector withObject:[array objectAtIndex:i]];
 		if (flag) [resultArray addObject:(result?result:[NSNull null])];
 	}
 	return resultArray;
 }
 
-- (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(id)array {
-	return [self performSelector:(SEL) aSelector onObjectsInArray:(id)array returnValues:YES];
+- (NSMutableArray *)performSelector:(SEL)aSelector onObjectsInArray:(NSArray *)array {
+	return [self performSelector:aSelector onObjectsInArray:array returnValues:YES];
 }
 
 @end
@@ -115,7 +115,7 @@
 @implementation NSMutableArray (Reverse)
 
 - (void)reverse {
-	int i;
+	NSInteger i;
 	for (i = 0; i < (floor([self count]/2.0) ); i++)
 		[self exchangeObjectAtIndex:i withObjectAtIndex:([self count]-i-1)];
 }
